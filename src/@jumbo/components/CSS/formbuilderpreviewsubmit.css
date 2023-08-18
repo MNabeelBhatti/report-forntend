@@ -1,0 +1,10 @@
+.modal {
+  position: absolute;
+  /* top: unset; */
+}
+.btn-toolbar {
+  display: block !important;
+}
+.react-form-builder-form {
+  padding: 10px;
+}

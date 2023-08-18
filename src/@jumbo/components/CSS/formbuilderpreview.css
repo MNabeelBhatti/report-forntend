@@ -1,0 +1,13 @@
+.modal {
+  position: absolute;
+  top: 15 !important;
+}
+.btn-toolbar {
+  display: none;
+}
+.react-form-builder-form {
+  padding: 10px;
+}
+.react-form-builder .react-form-builder-toolbar h4 {
+  margin-top: 6px !important;
+}
