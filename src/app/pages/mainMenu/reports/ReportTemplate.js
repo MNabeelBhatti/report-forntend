@@ -63,7 +63,7 @@ const ReportTemplate = ({ report }) => {
           <h2 style={styles.heading}>{report.projectName}</h2>
           <h3>{report.title?.toUpperCase()}</h3>
           <div>
-            <img height={400} src={report.coverImg} />
+            <img style={{width:"100%",height:'600px',objectFit:"contain"}} src={report.coverImg} />
           </div>
         </div>
 
@@ -76,12 +76,11 @@ const ReportTemplate = ({ report }) => {
                 </h1>
                 {v.img !== "" && (
                   <div>
-                    <img height={500} src={v.img} />
+                    <img style={{width:"100%",height:'600px',objectFit:"contain"}} src={v.img} />
                   </div>
                 )}
                 <div
                   style={{
-                    fontSize: "14px",
                     pageBreakInside: "avoid !important",
                   }}
                   dangerouslySetInnerHTML={{ __html: v.htmlContent }}

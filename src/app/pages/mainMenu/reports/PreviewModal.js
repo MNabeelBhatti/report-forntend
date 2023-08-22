@@ -277,6 +277,7 @@ export default function PreviewModal({ report }) {
         aria-describedby="child-modal-description"
       >
         <Box sx={{ ...style }}>
+        
           {loading && <Loader />}
           <Grid container spacing={4}>
             <Grid item xs={10}>
