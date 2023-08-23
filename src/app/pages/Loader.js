@@ -11,6 +11,7 @@ export default function Loader() {
         zIndex: 100,
         width: "100%",
         minHeight: "100vh",
+        height:"100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

@@ -76,7 +76,7 @@ const ReportTemplate = ({ report }) => {
                 </h1>
                 {v.img !== "" && (
                   <div>
-                    <img style={{width:"100%",height:'600px',objectFit:"contain"}} src={v.img} />
+                    <img style={{width:"100%",objectFit:"contain"}} src={v.img} />
                   </div>
                 )}
                 <div

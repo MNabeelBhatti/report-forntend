@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Grid, IconButton } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import jsPDF from "jspdf";
@@ -10,10 +10,10 @@ import ReportTemplate from "./ReportTemplate";
 import { supabase } from "supabaseClient";
 import Loader from "app/pages/Loader";
 import axios from "axios";
-import { Buffer } from "buffer";
-import Pusher from 'pusher-js';
-import domToPdf from 'dom-to-pdf';
-import html2canvas from "html2canvas";
+// import { Buffer } from "buffer";
+// import Pusher from 'pusher-js';
+// import domToPdf from 'dom-to-pdf';
+// import html2canvas from "html2canvas";
 import io from "socket.io-client";
 // import { PDFDownloadLink, Document, Page, View, PDFViewer,Text } from "@react-pdf/renderer";
 // import ReactHtmlParser from 'react-html-parser';
@@ -44,7 +44,7 @@ export default function PreviewModal({ report }) {
   const [loading, setLoading] = React.useState(false);
   let baseUrl = "https://report-backend-lyart.vercel.app";
   let burl = "http://localhost:4000";
-  // const [socket, setSocket] = React.useState(null);
+ 
   var socket;
   // var pusher;
   const handleOpen = () => {
@@ -54,89 +54,47 @@ export default function PreviewModal({ report }) {
     setOpen(false);
   };
   const reportTemplateRef = useRef(null);
-  const addReport = async () => {
-    await supabase.from("reports").insert({ ...report });
+  const addReport = async (data) => {
+    await supabase.from("reports").insert(data);
   };
-  const updateReport = async () => {
+  const updateReport = async (data) => {
     await supabase
       .from("reports")
-      .update({ ...report })
-      .eq("id", report.id);
+      .update({ ...data })
+      .eq("id", data?.id);
   };
-  const convertToPdf = async () => {
-     const pdfElement = reportTemplateRef.current;
-    const canvas = await html2canvas(pdfElement, {
-      allowTaint: true,
-      useCORS:true,
-      y: 10,
-      scrollY: window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      }),
-      windowWidth: 205 ,
-    windowHeight: Math.min(295 - 5, pdfElement.clientHeight-10),
-    });
-    var imgData = canvas.toDataURL('image/png');
-    var imgWidth = 210; 
-    var pageHeight = 295;  
-    var imgHeight = canvas.height * imgWidth / canvas.width;
-    var heightLeft = imgHeight;
-    var doc = new jsPDF('p', 'mm');
-    var position = 0;
+  // const convertToPdf = async () => {
+  //    const pdfElement = reportTemplateRef.current;
+  //   const canvas = await html2canvas(pdfElement, {
+  //     allowTaint: true,
+  //     useCORS:true,
+  //     y: 10,
+  //     scrollY: window.scrollTo({
+  //       top: 0,
+  //       behavior: 'smooth'
+  //     }),
+  //     windowWidth: 205 ,
+  //   windowHeight: Math.min(295 - 5, pdfElement.clientHeight-10),
+  //   });
+  //   var imgData = canvas.toDataURL('image/png');
+  //   var imgWidth = 210; 
+  //   var pageHeight = 295;  
+  //   var imgHeight = canvas.height * imgWidth / canvas.width;
+  //   var heightLeft = imgHeight;
+  //   var doc = new jsPDF('p', 'mm');
+  //   var position = 0;
     
-    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+  //   doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  //   heightLeft -= pageHeight;
     
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      doc.addPage();
-      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    doc.save( 'file.pdf');
-    /////////
-    // const pdf = new jsPDF("p", "px", 'letter');
-    // const pdfElement = reportTemplateRef.current;
-
-    // const pdfWidth = pdf.internal.pageSize.getWidth();
-    // const pdfHeight = pdf.internal.pageSize.getHeight();
-    //   console.log(pdfWidth,pdfHeight);
-    // let yOffset = 0;
-    // const canvas = await html2canvas(pdfElement, {
-    //   y: yOffset,
-    //   windowWidth: pdfElement.clientWidth ,
-    // windowHeight: Math.min(pdfHeight - 20, pdfElement.clientHeight - yOffset),
-    // });
-    // const imageData = canvas.toDataURL('image/png');
-    // canvas.toBlob((blob)=>{
-    //       // console.log(URL.createObjectURL(blob));
-    //       window.open(URL.createObjectURL(blob))
-    //     })
-    // pdf.addImage(imageData, 'PNG', 0, 0, pdfWidth, 0);
-    // pdf.save('multipage.pdf');
-    ////////////////
-    // const pageHeight = pdfHeight - 20; // Leave some margin at the bottom
-    // while (yOffset < contentHeight) {
-    //   const canvas = await html2canvas(pdfElement, {
-    //     y: yOffset,
-    //     windowWidth: pdfWidth,
-    //   windowHeight: Math.min(pageHeight, pdfElement.clientHeight - yOffset),
-    //   });
-    //   const imageData = canvas.toDataURL('image/png');
-    //   canvas.toBlob((blob)=>{
-    //     // console.log(URL.createObjectURL(blob));
-    //     window.open(URL.createObjectURL(blob))
-    //   })
-    //   pdf.addImage(imageData, 'PNG', 0, 0, pdfWidth, 0);
-    //   yOffset += pageHeight;
-    //   if (yOffset < contentHeight) {
-    //     console.log('page');
-    //     pdf.addPage();
-    //   }
-    // }
-
-    // pdf.save('multipage.pdf');
-  };
+  //   while (heightLeft >= 0) {
+  //     position = heightLeft - imgHeight;
+  //     doc.addPage();
+  //     doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  //     heightLeft -= pageHeight;
+  //   }
+  //   doc.save( 'file.pdf');
+  // };
   const handleGeneratePdf = async () => {
     try {
       setLoading(true);
@@ -205,21 +163,38 @@ export default function PreviewModal({ report }) {
       setLoading(false);
     }
   };
-  const downloadPdf = async (pdf) => {
+  const downloadPdf = async (data) => {
     console.log('get pdf');
-    console.log(report);
     // const bufferData = Buffer.from(res.data.payload);
-    let blob =  new Blob([pdf], { type: "application/pdf" });
+    let blob =  new Blob([data?.pdf], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
     var link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", `${report?.projectNumber}.pdf`);
     document.body.appendChild(link);
     link.click();
-    report?.isNew ? await addReport() : await updateReport();
+    data?.data.isNew ? await addReport(data?.data) : await updateReport(data?.data);
     setLoading(false);
     handleClose();
   };
+  const socketCallback=useCallback(()=>{
+    socket = io(burl, {
+      path: "/socket.io",
+      transports: ["websocket", "polling"],
+      secure: true,
+      rejectUnauthorized: false ,
+    });
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+    socket.on("taskComplete", (data) => {
+      downloadPdf(data);
+    });
+    socket.on("taskFailed", (error) => {
+      console.log(error);
+      setLoading(false);
+    });
+  },[JSON.stringify(report)])
   useEffect(() => {
     // pusher = new Pusher('b8cfd2a46813c2362c99', {
     //   cluster: 'us2',
@@ -237,23 +212,7 @@ export default function PreviewModal({ report }) {
     //   setLoading(false);
     // });
     // return ()=> pusher.unsubscribe('wsp_channel')
-    socket = io(burl, {
-      path: "/socket.io",
-      transports: ["websocket", "polling"],
-      secure: true,
-      rejectUnauthorized: false ,
-    });
-    console.log(socket);
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-    });
-    socket.on("taskComplete", (pdf) => {
-      downloadPdf(pdf);
-    });
-    socket.on("taskFailed", (error) => {
-      console.log(error);
-      setLoading(false);
-    });
+    socketCallback();
     return () => socket?.close();
     // pusher?.connection?.state
   }, []);

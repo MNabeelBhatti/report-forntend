@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect ,useState} from "react";
 
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -49,6 +49,7 @@ import BasicModal from "@jumbo/components/Modal/modal";
 import StylledFeild from "@jumbo/components/StyledButtonField";
 import CreateReport from "./CreateReport.js";
 import { supabase } from "supabaseClient";
+import { Popconfirm } from "antd";
 
 
 const Reports = ({ sx }) => {
@@ -61,7 +62,7 @@ const Reports = ({ sx }) => {
   const [open, setOpen] = React.useState(false);
   const [reports, setReports] = React.useState([]);
   const [report, setReport] = React.useState(null);
-
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
  
@@ -73,12 +74,25 @@ const Reports = ({ sx }) => {
 			if (error) {
 				throw error;
 			}
-      console.log(data);
 			setReports(data);
 		} catch (error) {
 			console.log(error);
 		}
 	};
+  const handleDelete=async(id)=>{
+try {
+  setConfirmLoading(true)
+   await supabase
+  .from('reports')
+  .delete()
+  .match({ id})
+  getReports();
+  setConfirmLoading(false)
+} catch (error) {
+  console.log(error);
+  setConfirmLoading(false)
+}
+  }
 
   useEffect(()=>{
     getReports();
@@ -162,7 +176,7 @@ const Reports = ({ sx }) => {
                       </div>
                     </SurveyStyledTableCell>
                     <SurveyStyledTableCell component="th" scope="row">
-                      <p>{item?.created_at}</p>
+                      <p>{new Date(item?.created_at).toLocaleString()}</p>
                     </SurveyStyledTableCell>
                     <SurveyStyledTableCell component="th" scope="row">
                       <div className={classes.tableCell}>
@@ -200,8 +214,16 @@ const Reports = ({ sx }) => {
                       {/* <Tooltip title="Delete"> */}
                       <IconButton
                       // onClick={() => deleteUser(item._id)}
+
                       >
+                        <Popconfirm title={'are you sure?'} onConfirm={()=>{
+                          handleDelete(item?.id)
+                        }}   okButtonProps={{
+                          loading: confirmLoading,
+                        }} >
                         <Delete style={{ color: Color.GREY400 }} />
+                        </Popconfirm>
+                       
                       </IconButton>
                       {/* </Tooltip> */}
                     </SurveyStyledTableCell>

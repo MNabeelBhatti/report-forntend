@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Row,
@@ -66,6 +66,7 @@ const CreateReport = (props) => {
     clientName: "Shivm Dube",
   };
   const [report, setReport] = useState(initialReport);
+  const reportMemo=useMemo(()=>({...report,headings}),[JSON.stringify(report),JSON.stringify(headings)])
   const handleAddChild = async (subheading) => {
     let newarr = await addChildHeading(headings, subheading);
     setHeadings(newarr);
@@ -76,7 +77,6 @@ const CreateReport = (props) => {
     setHeadings(newarr);
     setIndex(null);
   };
-  const reportData = () => ({ ...report, headings: [...headings] });
   const uploadFile = async (file) => {
     try {
       setLoading(true);
@@ -110,6 +110,7 @@ const CreateReport = (props) => {
       setReport(initialReport);
     }
   }, [props?.updateReport]);
+
   return (
     <Box sx={ModalStyle}>
       {loading && <Loader />}
@@ -367,7 +368,7 @@ const CreateReport = (props) => {
         })}
       </div>
    
-      <PreviewModal report={reportData()} />
+      <PreviewModal report={reportMemo} />
     </Box>
   );
 };
