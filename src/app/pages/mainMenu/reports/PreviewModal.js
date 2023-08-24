@@ -44,6 +44,7 @@ export default function PreviewModal({ report }) {
   const [loading, setLoading] = React.useState(false);
   let baseUrl = "https://report-backend-lyart.vercel.app";
   let burl = "http://localhost:4000";
+  let awsurl='http://54.152.87.245:4000'
  
   var socket;
   // var pusher;
@@ -112,7 +113,7 @@ export default function PreviewModal({ report }) {
       //  let resp= await axios.get('http://localhost:4000/');
 
       let res = await axios.post(
-        burl+'/html2pdf',
+        awsurl+'/html2pdf',
         { ...data },
         // { responseType: "arraybuffer" }
       );
@@ -177,24 +178,7 @@ export default function PreviewModal({ report }) {
     setLoading(false);
     handleClose();
   };
-  const socketCallback=useCallback(()=>{
-    socket = io(burl, {
-      path: "/socket.io",
-      transports: ["websocket", "polling"],
-      secure: true,
-      rejectUnauthorized: false ,
-    });
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-    });
-    socket.on("taskComplete", (data) => {
-      downloadPdf(data);
-    });
-    socket.on("taskFailed", (error) => {
-      console.log(error);
-      setLoading(false);
-    });
-  },[JSON.stringify(report)])
+
   useEffect(() => {
     // pusher = new Pusher('b8cfd2a46813c2362c99', {
     //   cluster: 'us2',
@@ -212,7 +196,23 @@ export default function PreviewModal({ report }) {
     //   setLoading(false);
     // });
     // return ()=> pusher.unsubscribe('wsp_channel')
-    socketCallback();
+    socket = io(awsurl, {
+      path: "/socket.io",
+      transports: ["websocket", "polling"],
+      secure: true,
+      rejectUnauthorized: false ,
+    });
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+    socket.on("taskComplete", (data) => {
+      console.log(data);
+      downloadPdf(data);
+    });
+    socket.on("taskFailed", (error) => {
+      console.log(error);
+      setLoading(false);
+    });
     return () => socket?.close();
     // pusher?.connection?.state
   }, []);
